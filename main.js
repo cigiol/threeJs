@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Client } from "colyseus.js";
+import { Client, getStateCallbacks } from "colyseus.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -25,39 +25,28 @@ const client = new Client("ws://localhost:2567");
 
 async function start() {
     const room = await client.joinOrCreate("my_room");
+    const $ = getStateCallbacks(room);
 
-    let knownPlayers = new Set();
+    // Listen to 'player' instance additions
+    $(room.state).players.onAdd((player, sessionId) => {
+        const material = new THREE.MeshBasicMaterial({
+            color: sessionId === room.sessionId ? 0x0000ff : 0xff0000,
+        });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(player.x, player.y, player.z);
+        scene.add(cube);
+        cubes[sessionId] = cube;
+        $(player).onChange(() => {
+            console.log('Player changed:', player.x, player.y);
+            cube.position.set(player.x, player.y, player.z);
+        });
+    });
 
-    room.onStateChange((state) => {
-        for (const [sessionId, player] of state.players) {
-            if (!knownPlayers.has(sessionId)) {
-                knownPlayers.add(sessionId);
-
-                const material = new THREE.MeshBasicMaterial({
-                    color: sessionId === room.sessionId ? 0x0000ff : 0xff0000,
-                });
-                const cube = new THREE.Mesh(geometry, material);
-                cube.position.set(player.x, player.y, player.z);
-                scene.add(cube);
-                cubes[sessionId] = cube;
-
-                console.log("Player added:", sessionId);
-            } else {
-                const cube = cubes[sessionId];
-                if (cube) {
-                    cube.position.set(player.x, player.y, player.z);
-                }
-            }
-        }
-
-        for (const sessionId of knownPlayers) {
-            if (!state.players.has(sessionId)) {
-                scene.remove(cubes[sessionId]);
-                delete cubes[sessionId];
-                knownPlayers.delete(sessionId);
-                console.log("Player removed:", sessionId);
-            }
-        }
+    // Listen to 'player' instance removals
+    $(room.state).players.onRemove((player, sessionId) => {
+        scene.remove(cubes[sessionId]);
+        delete cubes[sessionId];
+        console.log("Player removed:", sessionId);
     });
 
 
