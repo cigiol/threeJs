@@ -1,14 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8" />
-    <title>Three.js + Colyseus + Vite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oyun Girişi</title>
+    <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
+    <div class="container">
+        <h1>Odaya Katıl veya Oluştur</h1>
+        <div class="form-group">
+            <button id="createBtn">Yeni Oda Oluştur</button>
+        </div>
+        <div class="form-group">
+            <input type="text" id="roomCodeInput" placeholder="Oda Kodu (örn: 2xY8z)" />
+            <button id="joinBtn">Odaya Katıl</button>
+        </div>
+        <div class="form-group" id="status"></div>
+        <script type="module" src="./lobby.js"></script>
+    </div>
 </body>
 
 </html>

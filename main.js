@@ -3,9 +3,9 @@ import { Client, getStateCallbacks } from "colyseus.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    75,
+    100,
     window.innerWidth / window.innerHeight,
-    0.1,
+    0.2,
     1000
 );
 const renderer = new THREE.WebGLRenderer();
@@ -17,18 +17,32 @@ camera.lookAt(0, 0, 0);
 
 const geometry = new THREE.BoxGeometry();
 const cubes = {}; // sessionId -> THREE.Mesh
-
-console.log("typeof cubes:", typeof cubes); // object olmalı
-console.log("cubes constructor:", cubes.constructor.name); // Object olmalı
-console.log("Object.keys(cubes):", Object.keys(cubes)); // sessionId dizisi olmalı
 const client = new Client("ws://localhost:2567");
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get("roomId");
+const roomIdEl = document.getElementById("roomId");
+const inviteLinkEl = document.getElementById("inviteLink");
+const copyBtn = document.getElementById("copyBtn");
 
 async function start() {
-    const room = await client.joinOrCreate("my_room");
+    const room = roomId ? await client.joinById(roomId) : await client.joinOrCreate("my_room");
     const $ = getStateCallbacks(room);
+    const inviteUrl = `${window.location.origin}/game?roomId=${room.roomId}`;
+
+    roomIdEl.innerText = room.roomId;
+    inviteLinkEl.value = inviteUrl;
+
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(inviteUrl)
+            .then(() => {
+                copyBtn.innerText = "Kopyalandı!";
+                setTimeout(() => copyBtn.innerText = "Kopyala", 2000);
+            });
+    });
 
     // Listen to 'player' instance additions
     $(room.state).players.onAdd((player, sessionId) => {
+
         const material = new THREE.MeshBasicMaterial({
             color: sessionId === room.sessionId ? 0x0000ff : 0xff0000,
         });
@@ -37,7 +51,6 @@ async function start() {
         scene.add(cube);
         cubes[sessionId] = cube;
         $(player).onChange(() => {
-            console.log('Player changed:', player.x, player.y);
             cube.position.set(player.x, player.y, player.z);
         });
     });
@@ -46,11 +59,8 @@ async function start() {
     $(room.state).players.onRemove((player, sessionId) => {
         scene.remove(cubes[sessionId]);
         delete cubes[sessionId];
-        console.log("Player removed:", sessionId);
     });
 
-
-    // Klavye kontrolü
     const keys = {};
     document.addEventListener("keydown", (e) => (keys[e.key] = true));
     document.addEventListener("keyup", (e) => (keys[e.key] = false));

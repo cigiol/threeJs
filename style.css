@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 300px;
+}
+
+.form-group {
+    margin-top: 1.5rem;
+}
+
+input[type="text"] {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+#hud {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(15, 23, 42, 0.8);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: sans-serif;
+    z-index: 10;
+}
+
+#inviteLink {
+    width: 240px;
+    padding: 4px;
+    margin-top: 4px;
+}
